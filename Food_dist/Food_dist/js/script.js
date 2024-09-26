@@ -1,106 +1,73 @@
-const genderBtns = document.querySelectorAll('#gender .calculating__choose-item')
-const ratioInputs = document.querySelectorAll('.calculating_choose_medium input')
-const actBtns = document.querySelectorAll('.calculating_choose_big .calculating_choose-item')
-const result_view = document.querySelector('.calculating_result span')
-const user = {
-    gender: "woman",
-    act: "small"
-}
-
-genderBtns.forEach((btn) => {
-    btn.onclick = () => {
-        document.querySelector('.calculating_choose-item_active')
-            .classList.remove('calculating_choose-item_active')
-        btn.classList.add('calculating_choose-item_active')
-
-        user.gender = btn.getAttribute('data-gender')
-    }
-})
-
-ratioInputs.forEach((inp) => {
-    inp.onkeyup = () => {
-        user[inp.id] = inp.value
-    }
-})
-
-// Для женщин: 655,1 + (9,563 × вес в кг) + (1,85 × рост в см) − (4,676 × возраст в годах);
-// Для мужчин: 66,5 + (13,75 × вес в кг) + (5,003 × рост в см) − (6,775 × возраст в годах);
-
-actBtns.forEach((btn) => {
-    btn.onclick = () => {
-        document.querySelector('.calculating_choose_big .calculating_choose-item_active')
-            .classList.remove('calculating_choose-item_active')
-        btn.classList.add('calculating_choose-item_active')
-
-        user.gender = btn.getAttribute('data-gender')
-    }
-})
-ratioInputs.forEach((inp) => {
-    inp.onkeyup = () => {
-        user[inp.id] = inp.value
-    }
-})
-
-// Для женщин: 655,1 + (9,563 × вес в кг) + (1,85 × рост в см) − (4,676 × возраст в годах);
-// Для мужчин: 66,5 + (13,75 × вес в кг) + (5,003 × рост в см) − (6,775 × возраст в годах);
-
-actBtns.forEach((btn) => {
-    btn.onclick = () => {
-        document.querySelector('.calculating_choose_big .calculating_choose-item_active')
-            .classList.remove('calculating_choose-item_active')
-        btn.classList.add('calculating_choose-item_active')
-
-        user.act = btn.getAttribute('data-act')
-        let result = 0
-
-        if (user.gender == "woman") {
-            result = 655.1 + (9.563 * user.weight) + (1.85 * user.height) - (4.676 * user.age)
-        } else {
-            result = 66.5 + (13.75 * user.weight) + (5.003 * user.height) - (6.775 * user.age)
-        }
-
-        result_view.innerHTML = Math.round(result)
-    }
-})
-
-const sec = document.getElementById('seconds');
-const min = document.getElementById('minutes');
-const timer = document.getElementById('hours');
-const days = document.getElementById('days');
+const sec = document.querySelector('.seconds');
+const min = document.querySelector('.minutes');
+const timer = document.querySelector('.hours');
+const days = document.querySelector('.days');
 
 let interval;
-let seconds = 59;
-let minutes = 59;
-let hours = 23;
-let day = 12;
+let seconds = 15; 
+let minutes = 0;
+let hours = 0;
+let day = 0;
 
-interval = setInterval(() => {
-    if (seconds === 0) {
-        seconds = 59;
-        if (minutes === 0) {
-            minutes = 59;
-            if (hours === 0) {
-                hours = 23;
-                day--;
-            } else {
-                hours--;
-            }
+function startTimer() {
+    interval = setInterval(() => {
+        if (seconds > 0) {
+            seconds--;
         } else {
-            minutes--;
+            if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+            } else if (hours > 0) {
+                hours--;
+                minutes = 59;
+                seconds = 59;
+            } else if (day > 0) {
+                day--;
+                hours = 23;
+                minutes = 59;
+                seconds = 59;
+            } else {
+                clearInterval(interval);
+                createConfetti();
+            }
         }
-    } else {
-        seconds--;
+
+        days.innerHTML = day < 10 ? '0' + day : day;
+        sec.innerHTML = seconds < 10 ? '0' + seconds : seconds;
+        min.innerHTML = minutes < 10 ? '0' + minutes : minutes;
+        timer.innerHTML = hours < 10 ? '0' + hours : hours;
+
+    }, 1000);
+}
+
+function createConfetti() {
+    const container = document.querySelector('.confetti-container');
+    for (let i = 0; i < 100; i++) {
+        createConfettiPiece(container);
     }
+}
 
-    
-    days.innerHTML = day < 10 ? '0' + day : day;
-    sec.innerHTML = seconds < 10 ? '0' + seconds : seconds;
-    min.innerHTML = minutes < 10 ? '0' + minutes : minutes;
-    timer.innerHTML = hours < 10 ? '0' + hours : hours;
+function createConfettiPiece(container) {
+    const piece = document.createElement('div');
+    piece.classList.add('confetti-piece');
+    piece.style.backgroundColor = randomColor();
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.animationDuration = Math.random() * 2 + 1 + 's';
+    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+    container.appendChild(piece);
 
-    
-    if (day === 0 && hours === 0 && minutes === 0 && seconds === 0) {
-        clearInterval(interval);
+    setTimeout(() => {
+        piece.remove();
+    }, 3000);
+}
+
+function randomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
     }
+    return color;
+}
 
-}, 1000);  
+startTimer();
